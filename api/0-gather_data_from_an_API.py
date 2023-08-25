@@ -1,44 +1,23 @@
 #!/usr/bin/python3
-""" api """
+'''
+Python script that returns information using REST API
+'''
 import requests
 import sys
 
+if __name__ == "__main__":
+    get_emp_id = sys.argv[1]
+    user_url = (f'https://jsonplaceholder.typicode.com/users/{get_emp_id}')
+    get_emp_data = requests.get(user_url).json()
+    todos_url = (
+        f'https://jsonplaceholder.typicode.com/todos?userId={get_emp_id}')
+    get_emp_tasks = requests.get(todos_url).json()
 
-def filter(data, key, val):
-    return [v for v in data if v[key] is val]
+    done_tasks = [task for task in get_emp_tasks if task.get("completed")]
 
-
-def first(data):
-    if len(data) < 1:
-        return None
-
-    return data[0]
-
-
-def must(value, error):
-    if value is None:
-        raise error
-
-    return value
-
-
-def main():
-    index = int(sys.argv[1])
-
-    users = requests.get('https://jsonplaceholder.typicode.com/users').json()
-    todos = requests.get('https://jsonplaceholder.typicode.com/todos').json()
-
-    user_data = must(first(filter(users, 'id', index)),
-                     ValueError("user not found"))
-    user_todos = filter(todos, 'userId', user_data['id'])
-    user_todos_done = filter(user_todos, 'completed', True)
-    user_todos_left = filter(user_todos, 'completed', False)
-
-    print('Employee %s is done with tasks(%s/%s):' %
-          (user_data['name'], len(user_todos_done), len(user_todos)))
-    for v in user_todos_done:
-        print('\t %s' % (v['title']))
-
-
-if __name__ == '__main__':
-    main()
+    print(
+        f"Employee {get_emp_data['name']} is done with "
+        f"tasks({len(done_tasks)}/{len(get_emp_tasks)}):"
+    )
+    for task in done_tasks:
+        print("\t", task["title"])
