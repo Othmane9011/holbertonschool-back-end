@@ -1,29 +1,30 @@
 #!/usr/bin/python3
-"""Using what you did in the task #0
- extend your Python script
- to export data in the JSON format."""
-
+'''
+Python script that exports data in the JSON format
+'''
 import json
 import requests
 import sys
 
-if __name__ == '__main__':
-    user_id = sys.argv[1]
-    url = "https://jsonplaceholder.typicode.com/"
-    user_data = requests.get(url + "users/" + user_id).json()
-    todo_data = requests.get(url + "todos?userId=" + user_id).json()
+if __name__ == "__main__":
+    get_emp_id = sys.argv[1]
+    user_url = (f'https://jsonplaceholder.typicode.com/users/{get_emp_id}')
+    get_emp_data = requests.get(user_url).json()
+    todos_url = (
+        f'https://jsonplaceholder.typicode.com/todos?userId={get_emp_id}'
+    )
+    get_emp_tasks = requests.get(todos_url).json()
 
-    tasks = []
-    for task in todo_data:
-        task_dict = {
-            "task": task["title"],
-            "completed": task["completed"],
-            "username": user_data["username"]
-        }
-        tasks.append(task_dict)
+    tasks_list = []
+    for task in get_emp_tasks:
+        task_dict = {}
+        task_dict["task"] = task.get("title")
+        task_dict["completed"] = task.get("completed")
+        task_dict["username"] = get_emp_data.get("username")
+        tasks_list.append(task_dict)
 
-    data = {user_id: tasks}
+    tasks_json = {}
+    tasks_json[get_emp_id] = tasks_list
 
-    with open(user_id + '.json', 'w') as f:
-        json.dump(data, f)
-
+    with open("{}.json".format(get_emp_id), 'w') as jsonfile:
+        json.dump(tasks_json, jsonfile)
