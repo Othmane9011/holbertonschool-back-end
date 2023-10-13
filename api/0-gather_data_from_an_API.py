@@ -1,23 +1,22 @@
 #!/usr/bin/python3
-'''
-Python script that returns information using REST API
-'''
+"""For a given employee ID, returns information about his/her
+   TODO list progress."""
+
 import requests
-import sys
+from sys import argv
 
-if __name__ == "__main__":
-    get_emp_id = sys.argv[1]
-    user_url = (f'https://jsonplaceholder.typicode.com/users/{get_emp_id}')
-    get_emp_data = requests.get(user_url).json()
-    todos_url = (
-        f'https://jsonplaceholder.typicode.com/todos?userId={get_emp_id}')
-    get_emp_tasks = requests.get(todos_url).json()
 
-    done_tasks = [task for task in get_emp_tasks if task.get("completed")]
-
-    print(
-        f"Employee {get_emp_data['name']} is done with "
-        f"tasks({len(done_tasks)}/{len(get_emp_tasks)}):"
-    )
-    for task in done_tasks:
-        print("\t", task["title"])
+if __name__ == '__main__':
+    user_page = requests.get(
+        "https://jsonplaceholder.typicode.com/users/{}".
+        format(argv[1])).json()
+    todo_page = requests.get(
+        "https://jsonplaceholder.typicode.com/todos?userId={}".
+        format(argv[1])).json()
+    titles = []
+    for task in todo_page:
+        if task.get('completed') is True:
+            titles.append(task.get('title'))
+    print("Employee {} is done with tasks({}/{}):".
+          format(user_page.get('name'), len(titles), len(todo_page)))
+    print("\n".join("\t {}".format(task) for task in titles))
