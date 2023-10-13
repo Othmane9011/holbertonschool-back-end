@@ -1,30 +1,28 @@
 #!/usr/bin/python3
-'''
- Python script to export data in the JSON format
-'''
+"""export employees's todo list progress"""
+
 import json
 import requests
 
-if __name__ == "__main__":
-    users_url = 'https://jsonplaceholder.typicode.com/users'
-    todos_url = 'https://jsonplaceholder.typicode.com/todos'
+if __name__ == '__main__':
+    users_page = requests.get(
+        "https://jsonplaceholder.typicode.com/users").json()
+    todo_page = requests.get(
+        "https://jsonplaceholder.typicode.com/todos").json()
+    userdict = {}
+    usernamedict = {}
 
-    users_data = requests.get(users_url).json()
-    todos_data = requests.get(todos_url).json()
+    for user in users_page:
+        uid = user.get("id")
+        userdict[uid] = []
+        usernamedict[uid] = user.get("username")
 
-    all_tasks = {}
-
-    for user in users_data:
-        user_id = str(user["id"])
-        all_tasks[user_id] = []
-
-        for task in todos_data:
-            if task["userId"] == user["id"]:
-                task_dict = {}
-                task_dict["username"] = user["username"]
-                task_dict["task"] = task["title"]
-                task_dict["completed"] = task["completed"]
-                all_tasks[user_id].append(task_dict)
-
+    for task in todo_page:
+        taskdict = {}
+        uid = task.get("userId")
+        taskdict["task"] = task.get('title')
+        taskdict["completed"] = task.get('completed')
+        taskdict["username"] = usernamedict.get(uid)
+        userdict.get(uid).append(taskdict)
     with open("todo_all_employees.json", 'w') as jsonfile:
-        json.dump(all_tasks, jsonfile)
+        json.dump(userdict, jsonfile)
